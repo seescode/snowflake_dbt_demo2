@@ -1,0 +1,64 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dbt-ci:
+    runs-on: ubuntu-latest
+
+    env:
+      DBT_PROFILES_DIR: .
+
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: |
+          pip install dbt-snowflake
+
+      - name: Create profiles.yml
+        run: |
+          cat <<EOF > profiles.yml
+          my_dbt_project:
+            target: ci
+            outputs:
+              ci:
+                type: snowflake
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                role: ${{ secrets.SNOWFLAKE_ROLE }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+                schema: ${{ secrets.SNOWFLAKE_SCHEMA }}
+                threads: 4
+          EOF
+
+      - name: Install dbt dependencies
+        run: dbt deps
+
+      - name: Run dbt debug
+        run: dbt debug
+
+      - name: Get previous manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: manifest
+        continue-on-error: true
+
+      - name: Run dbt build for modified models
+        run: |
+          dbt build \
+            --select state:modified+ \
+            --defer \
+            --state .
