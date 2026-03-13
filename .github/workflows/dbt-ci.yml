@@ -50,42 +50,7 @@ jobs:
       - name: Debug connection
         run: dbt debug
 
-      # Download production manifest (for defer/state)
-      - name: Download production manifest
-        uses: actions/download-artifact@v4
-        with:
-          name: prod-manifest
-          path: state
-        continue-on-error: true
-
-      - name: Run dbt build for modified models
+      - name: Run dbt build
         run: |
-          dbt build \
-            --select state:modified+ \
-            --defer \
-            --state state
+          dbt build
 
-      - name: Cleanup CI schema
-        if: always()
-        run: |
-          pip install snowflake-connector-python
-          python - <<EOF
-          import snowflake.connector
-          import os
-
-          conn = snowflake.connector.connect(
-              user=os.environ["SNOWFLAKE_USER"],
-              password=os.environ["SNOWFLAKE_PASSWORD"],
-              account=os.environ["SNOWFLAKE_ACCOUNT"],
-              warehouse=os.environ["SNOWFLAKE_WAREHOUSE"],
-              database=os.environ["SNOWFLAKE_DATABASE"],
-              role=os.environ["SNOWFLAKE_ROLE"],
-          )
-
-          schema = os.environ["PR_SCHEMA"]
-
-          cs = conn.cursor()
-          cs.execute(f"DROP SCHEMA IF EXISTS {schema}")
-          cs.close()
-          conn.close()
-          EOF
