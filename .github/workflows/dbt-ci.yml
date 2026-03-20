@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt
+      DBT_PROFILES_DIR: ~/.dbt
       PR_SCHEMA: dbt_pr_${{ github.event.pull_request.number }}
 
     steps:
