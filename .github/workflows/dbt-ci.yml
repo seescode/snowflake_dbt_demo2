@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DBT_PROFILES_DIR: .
+      DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt
       PR_SCHEMA: dbt_pr_${{ github.event.pull_request.number }}
 
     steps:
@@ -29,8 +29,8 @@ jobs:
 
       - name: Create profiles.yml
         run: |
-          mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
+          mkdir -p "$DBT_PROFILES_DIR"
+          cat <<EOF > "$DBT_PROFILES_DIR/profiles.yml"
           snowflake_dbt_demo2:
             target: ci
             outputs:
