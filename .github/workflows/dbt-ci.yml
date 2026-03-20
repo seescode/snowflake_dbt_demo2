@@ -29,7 +29,8 @@ jobs:
 
       - name: Create profiles.yml
         run: |
-          cat <<EOF > profiles.yml
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
           snowflake_dbt_demo2:
             target: ci
             outputs:
