@@ -1,0 +1,19 @@
+snowflake_dbt_demo2:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      role: ACCOUNTADMIN
+      warehouse: DBT_WAREHOUSE
+      database: DBT_DEMO2
+      schema: DEV
+      user: seesyong2
+      threads: 8
+    yong:
+      type: snowflake
+      role: ACCOUNTADMIN
+      warehouse: DBT_WAREHOUSE
+      database: DBT_DEMO2
+      schema: YONG
+      user: seesyong2
+      threads: 8
